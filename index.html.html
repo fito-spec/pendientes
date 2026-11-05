@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mis pendientes</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#1d2433;--muted:#6b7488;--line:#e3e7ef;--accent:#3b5bdb;--ok:#2f9e44;--warn:#e8890c;--bad:#d6336c;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141a;--card:#1c1f28;--text:#eceff6;--muted:#9aa3b8;--line:#2d3240;--accent:#7c9bff;--ok:#51cf66;--warn:#ffa94d;--bad:#ff6b9a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12141a;--card:#1c1f28;--text:#eceff6;--muted:#9aa3b8;--line:#2d3240;--accent:#7c9bff;--ok:#51cf66;--warn:#ffa94d;--bad:#ff6b9a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.5rem;margin:0 0 4px}h2{font-size:1.05rem;margin:0}
+.sub{color:var(--muted);margin:0 0 16px;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}.full{grid-column:1/-1}
+label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:3px}
+input,select,button{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;width:100%}
+button{cursor:pointer}button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+button.link{background:none;border:none;color:var(--muted);width:auto;padding:6px;font-size:.85rem}
+button.danger{color:var(--bad);border-color:var(--bad)}
+.perfil{display:flex;align-items:center;gap:12px;margin-bottom:8px;text-align:left}
+.av{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.err{color:var(--bad);font-size:.85rem;min-height:1.2em;margin:6px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.top button{width:auto;padding:6px 12px;font-size:.85rem}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px}
+.chip{width:auto;white-space:nowrap;border-radius:20px;padding:6px 12px;font-size:.88rem}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+#alerts .alert{background:var(--card);border:1px solid var(--warn);border-left:6px solid var(--warn);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+#alerts .alert.bad{border-color:var(--bad)}#alerts .alert button{width:auto;padding:4px 10px}
+.bar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:14px 0 8px;flex-wrap:wrap}
+.opts{display:flex;gap:8px;align-items:center;font-size:.85rem;color:var(--muted)}
+.opts select,.opts button{width:auto;padding:6px 8px;font-size:.85rem}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+li{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
+li.vencido{border-left-color:var(--bad)}li.hoy{border-left-color:var(--warn)}li.pronto{border-left-color:var(--accent)}li.hecho{opacity:.55;border-left-color:var(--ok)}
+li input[type=checkbox]{width:22px;height:22px;margin-top:2px;flex:none}
+.info{flex:1;min-width:0}.t{font-weight:600;word-break:break-word}li.hecho .t{text-decoration:line-through}
+.m{font-size:.82rem;color:var(--muted)}.badge{font-size:.75rem;font-weight:600}
+.vencido .badge{color:var(--bad)}.hoy .badge{color:var(--warn)}.pronto .badge{color:var(--accent)}
+.del{width:auto;border:none;background:none;color:var(--muted);padding:4px 8px;font-size:1.1rem}
+.empty{text-align:center;color:var(--muted);padding:24px}
+#notifState{font-size:.8rem;color:var(--muted)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<main>
+<section id="login"></section>
+<section id="app" class="hide">
+  <div class="top"><div><h1 id="hola"></h1></div><button id="lock" type="button">🔒 Bloquear</button></div>
+  <div id="alerts" aria-live="polite"></div>
+  <div class="chips" id="chips"></div>
+  <div class="card hide" id="newAp">
+    <div class="grid">
+      <div><label for="apEmoji">Emoji</label><input id="apEmoji" maxlength="2" placeholder="📁"></div>
+      <div><label for="apNombre">Nombre del apartado</label><input id="apNombre" maxlength="30" placeholder="Ej. Trabajo"></div>
+      <div class="full"><button class="primary" id="apAdd" type="button">Crear apartado</button></div>
+    </div>
+  </div>
+  <form class="card" id="f">
+    <div class="grid">
+      <div class="full"><label for="titulo">¿Qué tienes pendiente?</label><input id="titulo" required maxlength="120" placeholder="Ej. Reporte de Práctica 6"></div>
+      <div class="full"><label for="apSel">Apartado</label><select id="apSel"></select></div>
+      <div><label for="fecha">Fecha de vencimiento *</label><input id="fecha" type="date" required></div>
+      <div><label for="hora">Hora (opcional)</label><input id="hora" type="time"></div>
+      <div class="full"><button class="primary" type="submit">Agregar pendiente</button></div>
+    </div>
+  </form>
+  <div class="bar"><h2>Lista</h2>
+    <div class="opts"><label for="aviso" style="margin:0">Avisarme</label>
+      <select id="aviso"><option value="1440">1 día antes</option><option value="180">3 horas antes</option><option value="60">1 hora antes</option><option value="0">Al vencer</option></select>
+      <button id="btnNotif" type="button">🔔 Notificaciones</button></div></div>
+  <div id="notifState"></div>
+  <ul id="lista" style="margin-top:10px"></ul>
+  <div style="margin-top:14px;text-align:center"><button class="link" id="delAp" type="button"></button></div>
+</section>
+</main>
+<script>
+(function(){
+var P="pe2:profiles",D="pe2:data:",OLD="pendientes-escuela-v1";
+function get(k,d){try{var r=localStorage.getItem(k);return r?JSON.parse(r):d}catch(e){return d}}
+function set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+var perfiles=get(P,[]),cur=null,data=null,filtro="todos",avisados={},fails={},mode="list",sel=null,hiddenAt=0,armed=null;
+async function hash(pin,salt){
+  try{var b=new TextEncoder().encode(salt+":"+pin);var h=await crypto.subtle.digest("SHA-256",b);
+    return Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,"0")}).join("")}
+  catch(e){var s=salt+pin,h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return"f"+h}
+}
+/* ---------- Pantalla de acceso ---------- */
+function showLogin(){
+  cur=null;data=null;$("app").classList.add("hide");$("login").classList.remove("hide");$("alerts").innerHTML="";
+  var h="";
+  if(mode==="list"){
+    h='<h1>📚 Mis pendientes</h1><p class="sub">'+(perfiles.length?"¿Quién eres?":"Crea tu primer perfil para empezar.")+'</p>';
+    perfiles.forEach(function(p){h+='<button class="card perfil" data-p="'+p.id+'"><span class="av">'+esc(p.nombre.charAt(0).toUpperCase())+'</span><span><b>'+esc(p.nombre)+'</b></span></button>'});
+    h+='<button class="primary" id="goNew" type="button">➕ Crear perfil</button>';
+  }else if(mode==="pin"){
+    var p=perfiles.filter(function(x){return x.id===sel})[0];
+    h='<h1>Hola, '+esc(p.nombre)+'</h1><p class="sub">Escribe tu código de acceso.</p><div class="card"><label for="pin">Código</label><input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="8"><div class="err" id="err"></div><button class="primary" id="enter" type="button">Entrar</button></div>'+
+      '<button class="link" id="back" type="button">← Volver</button> <button class="link" id="forgot" type="button">¿Olvidaste el código? Borrar este perfil</button>';
+  }else{
+    h='<h1>Nuevo perfil</h1><p class="sub">El código evita que otros abran tus pendientes en este teléfono.</p><div class="card"><div class="grid"><div class="full"><label for="nom">Nombre</label><input id="nom" maxlength="30"></div><div><label for="pin1">Código (4 a 8 números)</label><input id="pin1" type="password" inputmode="numeric" maxlength="8"></div><div><label for="pin2">Repetir código</label><input id="pin2" type="password" inputmode="numeric" maxlength="8"></div></div><div class="err" id="err"></div><button class="primary" id="create" type="button">Crear perfil</button></div>'+(perfiles.length?'<button class="link" id="back" type="button">← Volver</button>':'');
+  }
+  $("login").innerHTML=h;
+}
+$("login").addEventListener("click",async function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.p){sel=b.dataset.p;mode="pin";showLogin();return}
+  if(b.id==="goNew"){mode="new";showLogin()}
+  else if(b.id==="back"){mode="list";armed=null;showLogin()}
+  else if(b.id==="enter"){
+    var p=perfiles.filter(function(x){return x.id===sel})[0],f=fails[sel]||{n:0,until:0};
+    if(Date.now()<f.until){$("err").textContent="Demasiados intentos. Espera "+Math.ceil((f.until-Date.now())/1000)+" s.";return}
+    var hh=await hash($("pin").value,p.salt);
+    if(hh===p.hash){fails[sel]={n:0,until:0};entrar(p)}
+    else{f.n++;if(f.n>=5){f.until=Date.now()+30000;f.n=0}fails[sel]=f;$("err").textContent="Código incorrecto.";$("pin").value=""}
+  }
+  else if(b.id==="forgot"){
+    if(armed!==sel){armed=sel;b.textContent="Toca otra vez: se borrarán sus pendientes";return}
+    perfiles=perfiles.filter(function(x){return x.id!==sel});set(P,perfiles);try{localStorage.removeItem(D+sel)}catch(x){}
+    armed=null;mode=perfiles.length?"list":"new";showLogin();
+  }
+  else if(b.id==="create"){
+    var n=$("nom").value.trim(),a=$("pin1").value,c=$("pin2").value;
+    if(!n)return $("err").textContent="Escribe un nombre.";
+    if(!/^\d{4,8}$/.test(a))return $("err").textContent="El código debe tener de 4 a 8 números.";
+    if(a!==c)return $("err").textContent="Los códigos no coinciden.";
+    var salt=uid(),p={id:uid(),nombre:n,salt:salt,hash:await hash(a,salt)};
+    var d={aviso:"1440",apartados:[{id:"escuela",nombre:"Escuela",emoji:"📚"},{id:"casa",nombre:"Casa",emoji:"🏠"}],tareas:[]};
+    if(!perfiles.length){var old=get(OLD,[]);old.forEach(function(t){d.tareas.push({id:t.id,titulo:t.titulo,apartado:"escuela",fecha:t.fecha,hora:t.hora,hecho:t.hecho})})}
+    perfiles.push(p);set(P,perfiles);set(D+p.id,d);entrar(p);
+  }
+});
+function entrar(p){
+  cur=p;data=get(D+p.id,null)||{aviso:"1440",apartados:[],tareas:[]};
+  filtro="todos";avisados={};mode="list";
+  $("login").classList.add("hide");$("app").classList.remove("hide");
+  $("hola").textContent="Hola, "+p.nombre;$("aviso").value=data.aviso;
+  notifEstado();revisar();
+}
+function guardar(){if(cur)set(D+cur.id,data)}
+$("lock").onclick=function(){showLogin()};
+/* ---------- Lógica de pendientes ---------- */
+function venc(t){return new Date(t.fecha+"T"+(t.hora||"23:59")+":00")}
+function estado(t){
+  if(t.hecho)return{c:"hecho",txt:"Completado"};
+  if(venc(t)-Date.now()<0)return{c:"vencido",txt:"Vencido"};
+  var hoy=new Date();hoy.setHours(0,0,0,0);
+  var dias=Math.round((new Date(t.fecha+"T00:00:00")-hoy)/864e5);
+  if(dias===0)return{c:"hoy",txt:"Vence hoy"};if(dias===1)return{c:"pronto",txt:"Vence mañana"};
+  if(dias<=3)return{c:"pronto",txt:"Vence en "+dias+" días"};return{c:"",txt:"En "+dias+" días"};
+}
+function fmt(t){return new Date(t.fecha+"T00:00:00").toLocaleDateString("es-MX",{weekday:"short",day:"numeric",month:"short"})+(t.hora?" · "+t.hora:"")}
+function apOf(id){return data.apartados.filter(function(a){return a.id===id})[0]}
+function render(){
+  if(!data)return;
+  var h='<button class="chip'+(filtro==="todos"?" on":"")+'" data-f="todos">Todos</button>';
+  data.apartados.forEach(function(a){
+    var n=data.tareas.filter(function(t){return t.apartado===a.id&&!t.hecho}).length;
+    h+='<button class="chip'+(filtro===a.id?" on":"")+'" data-f="'+a.id+'">'+esc(a.emoji)+" "+esc(a.nombre)+(n?" ("+n+")":"")+'</button>';
+  });
+  h+='<button class="chip" data-f="__new">＋ Apartado</button>';
+  $("chips").innerHTML=h;
+  var cur_sel=$("apSel").value;
+  $("apSel").innerHTML=data.apartados.map(function(a){return'<option value="'+a.id+'">'+esc(a.emoji)+" "+esc(a.nombre)+'</option>'}).join("");
+  $("apSel").value=filtro!=="todos"&&apOf(filtro)?filtro:(apOf(cur_sel)?cur_sel:(data.apartados[0]||{}).id);
+  var lista=data.tareas.filter(function(t){return filtro==="todos"||t.apartado===filtro}).sort(function(a,b){return a.hecho!==b.hecho?(a.hecho?1:-1):venc(a)-venc(b)});
+  $("lista").innerHTML=lista.length?lista.map(function(t){
+    var e=estado(t),a=apOf(t.apartado);
+    return'<li class="'+e.c+'"><input type="checkbox" data-id="'+t.id+'" '+(t.hecho?"checked":"")+' aria-label="Hecho"><div class="info"><div class="t">'+esc(t.titulo)+'</div><div class="m">'+(a?esc(a.emoji)+" "+esc(a.nombre)+" · ":"")+fmt(t)+' · <span class="badge">'+e.txt+'</span></div></div><button class="del" data-del="'+t.id+'" aria-label="Eliminar">✕</button></li>';
+  }).join(""):'<div class="empty">No hay pendientes aquí. ¡Agrega el primero!</div>';
+  var ap=apOf(filtro);$("delAp").classList.toggle("hide",!ap||data.apartados.length<2);
+  if(ap)$("delAp").textContent=armed==="ap"?"Toca otra vez: se borrarán sus pendientes":"Eliminar apartado «"+ap.nombre+"»";
+}
+$("chips").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;armed=null;
+  if(b.dataset.f==="__new"){$("newAp").classList.toggle("hide");return}
+  filtro=b.dataset.f;render();
+});
+$("apAdd").onclick=function(){
+  var n=$("apNombre").value.trim();if(!n)return;
+  var a={id:uid(),nombre:n,emoji:$("apEmoji").value.trim()||"📁"};
+  data.apartados.push(a);guardar();filtro=a.id;$("apNombre").value="";$("apEmoji").value="";$("newAp").classList.add("hide");render();
+};
+$("delAp").onclick=function(){
+  if(armed!=="ap"){armed="ap";render();return}
+  data.tareas=data.tareas.filter(function(t){return t.apartado!==filtro});
+  data.apartados=data.apartados.filter(function(a){return a.id!==filtro});
+  armed=null;filtro="todos";guardar();render();
+};
+$("f").onsubmit=function(e){
+  e.preventDefault();
+  var t={id:uid(),titulo:$("titulo").value.trim(),apartado:$("apSel").value,fecha:$("fecha").value,hora:$("hora").value,hecho:false};
+  if(!t.titulo||!t.fecha||!t.apartado)return;
+  data.tareas.push(t);guardar();$("titulo").value="";$("hora").value="";revisar();
+};
+$("lista").addEventListener("click",function(e){var id=e.target.getAttribute("data-del");if(id){data.tareas=data.tareas.filter(function(t){return t.id!==id});guardar();render()}});
+$("lista").addEventListener("change",function(e){var id=e.target.getAttribute("data-id");if(id){data.tareas.forEach(function(t){if(t.id===id)t.hecho=e.target.checked});guardar();render()}});
+$("aviso").onchange=function(e){data.aviso=e.target.value;guardar();avisados={};revisar()};
+/* ---------- Avisos ---------- */
+function notificar(t,msg,bad){
+  var d=document.createElement("div");d.className="alert"+(bad?" bad":"");
+  d.innerHTML="<span>"+(bad?"⛔ ":"⏰ ")+esc(msg)+'</span><button type="button">OK</button>';
+  d.querySelector("button").onclick=function(){d.remove()};$("alerts").appendChild(d);
+  try{if("Notification" in window&&Notification.permission==="granted")new Notification("Pendiente: "+t.titulo,{body:msg})}catch(e){}
+}
+function revisar(){
+  if(!data)return;
+  var lead=parseInt(data.aviso,10)*60000,now=Date.now();
+  data.tareas.forEach(function(t){
+    if(t.hecho)return;var v=venc(t).getTime();
+    if(now>v){if(!avisados[t.id+"v"]){avisados[t.id+"v"]=1;notificar(t,"«"+t.titulo+"» ya venció ("+fmt(t)+").",true)}}
+    else if(now>=v-lead){if(!avisados[t.id+"p"]){avisados[t.id+"p"]=1;notificar(t,"«"+t.titulo+"» vence pronto: "+fmt(t)+".",false)}}
+  });
+  render();
+}
+function notifEstado(){
+  var el=$("notifState"),b=$("btnNotif");
+  if(!("Notification" in window)){el.textContent="Los avisos aparecerán dentro de la página.";b.style.display="none";return}
+  if(Notification.permission==="granted"){el.textContent="Notificaciones activadas (la página debe estar abierta y desbloqueada).";b.style.display="none"}
+  else if(Notification.permission==="denied"){el.textContent="Notificaciones bloqueadas; verás los avisos dentro de la página.";b.style.display="none"}
+  else el.textContent="Los avisos aparecen arriba. Activa las notificaciones para recibirlos también como alerta.";
+}
+$("btnNotif").onclick=function(){try{Notification.requestPermission().then(notifEstado)}catch(e){notifEstado()}};
+/* ---------- Bloqueo automático ---------- */
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden){hiddenAt=Date.now()}
+  else if(cur&&hiddenAt&&Date.now()-hiddenAt>60000){hiddenAt=0;showLogin()}
+  else if(cur)revisar();
+});
+var hoy=new Date();hoy.setMinutes(hoy.getMinutes()-hoy.getTimezoneOffset());$("fecha").min=hoy.toISOString().slice(0,10);
+setInterval(revisar,30000);
+mode=perfiles.length?"list":"new";showLogin();
+})();
+</script>
+</body>
+</html>
